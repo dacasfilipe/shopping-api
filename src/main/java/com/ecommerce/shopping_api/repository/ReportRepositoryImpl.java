@@ -51,9 +51,12 @@ public class ReportRepositoryImpl implements ReportRepository {
         query.setParameter("dataFim", dataFim.atTime(23, 59));
         Object[] result = (Object[]) query.getSingleResult();
         ShopReportDTO shopReportDTO = new ShopReportDTO();
-        shopReportDTO.setCount(((BigInteger) result[0]).intValue());
-        shopReportDTO.setTotal((Double) result[1]);
-        shopReportDTO.setMean((Double) result[2]);
+//        shopReportDTO.setCount(((BigInteger) result[0]).intValue());
+//        shopReportDTO.setTotal((Double) result[1]);
+//        shopReportDTO.setMean((Double) result[2]);
+        shopReportDTO.setCount(((Number) result[0]).intValue());
+        shopReportDTO.setTotal(((Number) result[1]).doubleValue());
+        shopReportDTO.setMean(((Number) result[2]).doubleValue());
         return shopReportDTO;
     }
 
