@@ -39,6 +39,7 @@ public class ShopController {
     @PostMapping("/shopping")
     @ResponseStatus(HttpStatus.CREATED)
     public ShopDTO newShop(@Valid @RequestBody ShopDTO shopDTO) {
+
         return shopService.save(shopDTO);
     }
 
