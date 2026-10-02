@@ -1,0 +1,510 @@
+{
+  "info": {
+    "_postman_id": "d681bdcc-8807-4d23-a0bf-158594cfbdaf",
+    "name": "Shopping API",
+    "description": "Coleção de testes da Shopping API validada em 31/08/2026. Requer Shopping API em http://localhost:8082, User API em http://localhost:8080, Product API em http://localhost:8081 e PostgreSQL configurado. Execute primeiro 'Cadastrar compra' e depois as consultas.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8082",
+      "type": "string"
+    },
+    {
+      "key": "shopId",
+      "value": "3",
+      "type": "string"
+    },
+    {
+      "key": "userIdentifier",
+      "value": "04517788807",
+      "type": "string"
+    },
+    {
+      "key": "dataInicio",
+      "value": "01/08/2026",
+      "type": "string"
+    },
+    {
+      "key": "dataFim",
+      "value": "31/08/2026",
+      "type": "string"
+    },
+    {
+      "key": "dateTimeInicio",
+      "value": "2026-08-01T00:00:00",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "Compras",
+      "item": [
+        {
+          "name": "Cadastrar compra",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userIdentifier\": \"{{userIdentifier}}\",\n  \"items\": [\n    {\n      \"productIdentifier\": \"tv\",\n      \"price\": 0\n    },\n    {\n      \"productIdentifier\": \"video-game\",\n      \"price\": 0\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shopping",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shopping"
+              ]
+            },
+            "description": "Cadastra uma compra para o CPF existente 04517788807. A API consulta os produtos tv e video-game, substitui os preços enviados pelos preços cadastrados, calcula o total e preenche a data. Cada execução cria um novo registro."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 201 Created\", function () {",
+                  "    pm.response.to.have.status(201);",
+                  "});",
+                  "",
+                  "pm.test(\"Total calculado corretamente\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response.total).to.eql(3000.0);",
+                  "    pm.expect(response.userIdentifier).to.eql(pm.collectionVariables.get(\"userIdentifier\"));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Listar todas as compras",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shopping",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shopping"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Resposta é uma lista\", function () {",
+                  "    pm.expect(pm.response.json()).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar compra por ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shopping/{{shopId}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shopping",
+                "{{shopId}}"
+              ]
+            },
+            "description": "A variável shopId aponta inicialmente para a compra 3 criada durante a validação local. Altere-a caso esse registro não exista no seu banco."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar compras por usuário",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shopping/shopByUser/{{userIdentifier}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shopping",
+                "shopByUser",
+                "{{userIdentifier}}"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Todas as compras pertencem ao usuário\", function () {",
+                  "    const expectedUser = pm.collectionVariables.get(\"userIdentifier\");",
+                  "    pm.response.json().forEach(shop => pm.expect(shop.userIdentifier).to.eql(expectedUser));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Buscar compras posteriores à data",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"date\": \"{{dateTimeInicio}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shopping/shopByDate",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shopping",
+                "shopByDate"
+              ]
+            },
+            "description": "O endpoint atual usa body em GET. Isso funciona no Postman, mas não é recomendado para APIs HTTP."
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Resposta é uma lista\", function () {",
+                  "    pm.expect(pm.response.json()).to.be.an(\"array\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Filtros e relatório",
+      "item": [
+        {
+          "name": "Pesquisar somente pela data inicial",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shopping/search?dataInicio={{dataInicio}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shopping",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "dataInicio",
+                  "value": "{{dataInicio}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Pesquisar por intervalo e valor",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shopping/search?dataInicio={{dataInicio}}&dataFim={{dataFim}}&valorMinimo=4000",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shopping",
+                "search"
+              ],
+              "query": [
+                {
+                  "key": "dataInicio",
+                  "value": "{{dataInicio}}"
+                },
+                {
+                  "key": "dataFim",
+                  "value": "{{dataFim}}"
+                },
+                {
+                  "key": "valorMinimo",
+                  "value": "4000",
+                  "description": "O código atual trata esse parâmetro como valor máximo, usando total <= valorMinimo."
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Totais respeitam a implementação atual do filtro\", function () {",
+                  "    pm.response.json().forEach(shop => pm.expect(shop.total).to.be.at.most(4000));",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Gerar relatório por período",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/shopping/report?dataInicio={{dataInicio}}&dataFim={{dataFim}}",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shopping",
+                "report"
+              ],
+              "query": [
+                {
+                  "key": "dataInicio",
+                  "value": "{{dataInicio}}"
+                },
+                {
+                  "key": "dataFim",
+                  "value": "{{dataFim}}"
+                }
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 200 OK\", function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "",
+                  "pm.test(\"Relatório contém os campos esperados\", function () {",
+                  "    const response = pm.response.json();",
+                  "    pm.expect(response).to.have.all.keys(\"count\", \"total\", \"mean\");",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Validações",
+      "item": [
+        {
+          "name": "Rejeitar usuário vazio",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userIdentifier\": \"\",\n  \"items\": [\n    {\n      \"productIdentifier\": \"tv\",\n      \"price\": 1000.0\n    }\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shopping",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shopping"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        },
+        {
+          "name": "Rejeitar lista de itens ausente",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userIdentifier\": \"{{userIdentifier}}\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/shopping",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "shopping"
+              ]
+            }
+          },
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.test(\"Status 400 Bad Request\", function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
