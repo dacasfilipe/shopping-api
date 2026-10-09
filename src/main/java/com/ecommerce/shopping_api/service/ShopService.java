@@ -7,6 +7,7 @@ import com.ecommerce.shopping_api.model.Shop;
 import com.ecommerce.shopping_api.repository.ShopRepository;
 import com.ecommerce.shopping_api.dto.ItemDTO;
 import com.ecommerce.shopping_client.dto.ProductDTO;
+import com.ecommerce.shopping_client.exception.ProductNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -95,26 +96,20 @@ public class ShopService {
                 .getReportByDate(dataInicio, dataFim);
     }
     // comunicação com os microserviços
-    public ShopDTO save(ShopDTO shopDTO) {
-        if (userService
-                .getUserByCpf(shopDTO.getUserIdentifier()) == null) {
-            return null;
-        }
-
+    public ShopDTO save(ShopDTO shopDTO, String key) {
+        userService.getUserByCpf(shopDTO.getUserIdentifier(), key);
         if (!validateProducts(shopDTO.getItems())) {
-            return null;
+            throw new ProductNotFoundException();
         }
 
-        shopDTO.setTotal(shopDTO.getItems()
-                .stream()
-                .map(x -> x.getPrice())
-                .reduce((float) 0, Float::sum));
+        shopDTO.setTotal(shopDTO.getItems().stream()
+                .map(ItemDTO::getPrice)
+                .reduce(0.0f, Float::sum));
 
         Shop shop = Shop.convert(shopDTO);
         shop.setDate(LocalDateTime.now());
-
-        shop = shopRepository.save(shop);
-        return DTOConverter.convert(shop);
+        Shop saved = shopRepository.save(shop);
+        return DTOConverter.convert(saved);
     }
 
     private boolean validateProducts(List<ItemDTO> items) {

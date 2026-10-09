@@ -1,6 +1,7 @@
 package com.ecommerce.shopping_api.service;
 
 import com.ecommerce.shopping_client.dto.UserDTO;
+import com.ecommerce.shopping_client.exception.InvalidAccessKeyException;
 import com.ecommerce.shopping_client.exception.UserNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -28,16 +29,29 @@ public class UserService {
 //        }
 //
 //    }
-    public UserDTO getUserByCpf(String cpf) {
-        try {
-            return WebClient.builder().baseUrl(userApiURL).build()
-                    .get().uri("/user/{cpf}/cpf", cpf)
-                    .retrieve()
-                    .bodyToMono(UserDTO.class)
-                    .block();
-        } catch (WebClientResponseException.NotFound ex) {
-            throw new UserNotFoundException();
-        }
+//    public UserDTO getUserByCpf(String cpf) {
+//        try {
+//            return WebClient.builder().baseUrl(userApiURL).build()
+//                    .get().uri("/user/{cpf}/cpf", cpf)
+//                    .retrieve()
+//                    .bodyToMono(UserDTO.class)
+//                    .block();
+//        } catch (WebClientResponseException.NotFound ex) {
+//            throw new UserNotFoundException();
+//        }
+//    }
+public UserDTO getUserByCpf(String cpf, String key) {
+    try {
+        return WebClient.builder().baseUrl(userApiURL).build()
+                .get()
+                .uri("/user/{cpf}/cpf", cpf)
+                .header("key", key)
+                .retrieve()
+                .bodyToMono(UserDTO.class)
+                .block();
+    } catch (WebClientResponseException.Unauthorized ex) {
+        throw new InvalidAccessKeyException();
     }
+}
 
 }
