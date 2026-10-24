@@ -5,10 +5,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
+import org.springframework.beans.factory.annotation.Value;
+
 
 @Service
 public class ProductService {
-    private String productApiURL = "http://localhost:8081";
+    //private String productApiURL = "http://localhost:8081";
+    @Value("${product.api.url:http://localhost:8081}")
+    private String productApiURL;
 //    public ProductDTO getProductByIdentifier(String productIdentifier) {
 //
 //        try {

@@ -1,17 +1,19 @@
 package com.ecommerce.shopping_api.service;
 
 import com.ecommerce.shopping_client.dto.UserDTO;
-import com.ecommerce.shopping_client.exception.InvalidAccessKeyException;
+import com.ecommerce.shopping_client.exception.InvalidAcessKeyException;
 import com.ecommerce.shopping_client.exception.UserNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
 import reactor.core.publisher.Mono;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 public class UserService {
-    private String userApiURL = "http://localhost:8080";
-
+    //private String userApiURL = "http://localhost:8080";
+    @Value("${user.api.url:http://localhost:8080}")
+    private String userApiURL;
 //    public UserDTO getUserByCpf(String cpf) {
 //        try {
 //            WebClient webClient = WebClient.builder()
@@ -50,7 +52,7 @@ public UserDTO getUserByCpf(String cpf, String key) {
                 .bodyToMono(UserDTO.class)
                 .block();
     } catch (WebClientResponseException.Unauthorized ex) {
-        throw new InvalidAccessKeyException();
+        throw new InvalidAcessKeyException();
     }
 }
 
